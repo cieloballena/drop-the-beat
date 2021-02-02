@@ -1,71 +1,24 @@
 import map
+import numpy as np
 
 MapList = []
-song1 = map.Map("Songs\Cash_Cash_-_Overtime.ogg","Overtime", "Cash Cash", 5)
-song2 = map.Map("Songs\Zedd - Find You ft. Matthew Koma & Miriam Bryant (TAK Remix).ogg","Find You","Zedd",2)
-Clarity_Remix = map.Map("Songs\Clarity_Zedd_Union_Mix_Zedd_320k_mp3.ogg","Clarity(zedd union remix)","Zedd",1)
+song0 = map.Map("Songs\_dynamite.ogg", "Dynamite", "방탄소년단", 5)
+song1 = map.Map("Songs\_shelter.mp3", "Shelter", "Porter Robinson", 2)
+song2 = map.Map("Songs\_hot air balloon.mp3","Hot Air balloon", "Owl City", 6)
+song3 = map.Map("Songs\_girl.mp3","Uptown Girl", "Billy Joel", 3)
 
+MapList.append(song0) # add song
 MapList.append(song1)
 MapList.append(song2)
-MapList.append(Clarity_Remix)
+MapList.append(song3)
 
-# Last Note is Dummy Note;
-#=========================================================
+def load_notes(song, npy): # load notes array
+    track = np.load(npy)
+    
+    for message in track:
+        song.add_note(message[0], message[1])
 
-song1.add_note(2, 3, 550)
-song1.add_note(3, 5, 550)
-song1.add_note(1, 7)
-song1.add_note(2, 8)
-song1.add_note(3, 9)
-song1.add_note(1, 10)
-song1.add_note(2, 11)
-song1.add_note(3, 12)
-song1.add_note(1, 13)
-song1.add_note(2, 14)
-song1.add_note(3, 15)
-song1.add_note(1, 16)
-song1.add_note(2, 17)
-song1.add_note(3, 18)
-song1.add_note(1, 19)
-song1.add_note(2, 20)
-song1.add_note(3, 21)
-song1.add_note(1, 22)
-song1.add_note(2, 23)
-song1.add_note(3, 24)
-song1.add_note(1, 25)
-song1.add_note(2, 26)
-song1.add_note(3, 27)
-song1.add_note(1, 28)
-song1.add_note(2, 28.5, 550)
-song1.add_note(3, 28.7, 550)
-song1.add_note(1, 29)
-song1.add_note(2, 30.1)
-song1.add_note(3, 31)
-song1.add_note(1, 32)
-song1.add_note(2, 33.5)
-song1.add_note(3, 34)
-song1.add_note(1, 36)
-song1.add_note(2, 37)
-song1.add_note(3, 39)
-song1.add_note(1, 42)
-song1.add_note(2, 43)
-song1.add_note(3, 44)
-song1.add_note(1, 45)
-song1.add_note(2, 45.6)
-song1.add_note(3, 46.3)
-song1.add_note(1, 47)
-song1.add_note(2, 48.5)
-song1.add_note(3, 49)
-song1.add_note(1, 51)
-song1.add_note(2, 52)
-song1.add_note(3, 55)
-
-song1.add_note(3,3)
-
-song2.add_note(1, 5)
-song2.add_note(3, 7)
-song2.add_note(4, 9)
-
-song2.add_note(1,1)
-
-#==========================================================
+load_notes(song0, "Songs\_dynamite.npy") # assign notes to song
+load_notes(song1, "Songs\_shelter.npy")
+load_notes(song2, "Songs\_hot air balloon.npy")
+load_notes(song3, "Songs\_girl.npy")

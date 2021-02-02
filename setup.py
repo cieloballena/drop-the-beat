@@ -5,5 +5,4 @@ setup(
     version = "1.0",
     description ="BLUE is normal the Rhythm Game",
     executables = [Executable("main.py")]
-
 )

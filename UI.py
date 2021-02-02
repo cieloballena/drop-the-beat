@@ -4,78 +4,68 @@ import time
 import threading
 import MapList
 import Setting_Value
+import map
 
 pygame.init()
 
 # Defined Color
 BLACK = (0,0,0)
 WHITE = (255,255,255)
-NOT_SELECTED = (129,129,129)
+GRAY = (32,32,64)
+COMBO = (128,128,192)
+LIGHT_GRAY = (64, 64, 64)
+NOT_SELECTED = (129,129,155)
 SETTING_BAR = (62, 96, 111)
 EASY = (12, 232, 118)
 HARD = (232, 44, 12)
-TIMEBAR = (255, 0, 98)
+TIMEBAR = (32,32,64)
+ALPHA = 255
+BLPHA = 0
 
 MODE_GAME_READY = False
-
-
-class button_main(pygame.sprite.Sprite):
-    def __init__(self, screen, msg, x, y, font_size, action=None):
+            
+class button_main(pygame.sprite.Sprite): # intro state button
+    def __init__(self, screen, msg, x, y, font_size, selected, action=None):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface([30, 30])
-        self.image.fill((0,0,0))
-        self.image.set_alpha(0)
-        self.fadeOut = pygame.Surface(Setting_Value.Display_Set.display_size)
-        self.fadeOut.fill(BLACK)
-        self.fadeOut.set_alpha(0)
-        self.rect = self.image.get_rect()
-        self.rect.x = x
-        self.rect.y = y
         self.x = x
         self.y = y
         self.msg = msg
         self.font_size = font_size
         self.action = action
         self.screen = screen
+        self.selected = selected
 
-    def update(self,type = None):
-        self.mouse = pygame.mouse.get_pos()
-        self.click = pygame.mouse.get_pressed()
-        if self.x + 150 > self.mouse[0] > self.x and self.y + 90 > self.mouse[1] > self.y:
-            font = pygame.font.Font('Resource\Font\MASQUE__.ttf', self.font_size + 30)
+    def update(self, selected):
+        if selected == 0:
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFB.otf', self.font_size)
+            txt = font.render(self.msg, True, NOT_SELECTED)
+            self.selected = False
+        elif selected == 1:
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFB.otf', self.font_size)
+            txt = font.render(self.msg, True, WHITE)
+            self.selected = True
+            pygame.mixer.Sound("Sound\sound1.ogg").play()
+
+        self.screen.blit(txt, [self.x, self.y])
+    
+    def get_selected(self):
+        return self.selected
+    
+    def draw(self):
+        if self.selected == False:
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFB.otf', self.font_size)
+            txt = font.render(self.msg, True, NOT_SELECTED)
+        elif self.selected == True:
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFB.otf', self.font_size)
             txt = font.render(self.msg, True, WHITE)
 
-            #pygame.mixer.Sound("Sound\sound4.ogg").play()
-            if self.click[0] == 1 and type == 1:
-                pygame.mixer.Sound("Sound\sound2.ogg").play()
-                pygame.time.delay(500)
-                return 2
-            elif self.click[0] == 1 and type == 2:
-                pygame.mixer.Sound("Sound\sound2.ogg").play()
-                pygame.time.delay(500)
-                return 3
-            elif self.click[0] == 1 and type == 3:
-                pygame.mixer.Sound("Sound\sound2.ogg").play()
-                pygame.mixer.Sound("Sound\sound2.ogg").stop()
-                pygame.time.delay(150)
-                return 4
+        self.screen.blit(txt, [self.x, self.y])
 
-        else:
-            font = pygame.font.Font('Resource\Font\MASQUE__.ttf', self.font_size)
-            txt = font.render(self.msg, True, NOT_SELECTED)
-
-        self.screen.blit(txt,[self.x, self.y])
-
-
-class button_SongList(pygame.sprite.Sprite):
+class button_SongList(pygame.sprite.Sprite): # easy, hard button
     selected = 1
     # Easy = 1 / Hard = 2
-    def __init__(self, screen, button1_msg,  button1_x, button1_y, button2_msg,  button2_x, button2_y, action =None):
+    def __init__(self, screen, button1_msg,  button1_x, button1_y, button2_msg,  button2_x, button2_y, action = None):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.Surface([30, 30])
-        self.image.fill(BLACK)
-        self.image.set_alpha(0)
-        self.rect = self.image.get_rect()
         self.button1_x = button1_x
         self.button1_y = button1_y
         self.button1_msg = button1_msg
@@ -84,61 +74,46 @@ class button_SongList(pygame.sprite.Sprite):
         self.button2_msg = button2_msg
         self.screen = screen
 
-
     def update(self, selected):
         if selected ==1:
-            font = pygame.font.Font('Resource\Font\MASQUE__.ttf', 32)
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 60)
             self.easy = font.render(self.button1_msg, True, EASY)
-            font = pygame.font.Font('Resource\Font\MASQUE__.ttf', 25)
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 60)
             self.hard = font.render(self.button2_msg, True, NOT_SELECTED)
             self.selected = 1
         if selected == 2:
-            font = pygame.font.Font('Resource\Font\MASQUE__.ttf', 32)
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 60)
             self.hard = font.render(self.button2_msg, True, HARD)
-            font = pygame.font.Font('Resource\Font\MASQUE__.ttf', 25)
+            font = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 60)
             self.easy = font.render(self.button1_msg, True, NOT_SELECTED)
             self.selected = 2
 
-        self.screen.blit(self.easy, [self.button1_x, self.button1_y])
-        self.screen.blit(self.hard, [self.button2_x, self.button2_y])
+        #self.screen.blit(self.easy, [self.button1_x, self.button1_y])
+        #self.screen.blit(self.hard, [self.button2_x, self.button2_y])
 
     def get_mode(self):
         return self.selected
 
-
-class button_back(pygame.sprite.Sprite):
+class button_back(pygame.sprite.Sprite): # back button
     def __init__(self, screen, x, y):
         pygame.sprite.Sprite.__init__(self)
         self.x = x
         self.y = y
         self.screen = screen
+        
     def update(self):
         self.mouse = pygame.mouse.get_pos()
         self.click = pygame.mouse.get_pressed()
 
-        font = pygame.font.Font('Resource\Font\MASQUE__.ttf', 20)
-        back_txt = font.render("back",True,WHITE)
-        self.screen.blit(back_txt, [self.x, self.y])
-        if 75 > self.mouse[0] > 25 and  25 < self.mouse[1] <  50:
-            if self.click[0] == 1 :
+        back_button = pygame.image.load("Resource\_Icon\_back.png").convert_alpha()
+        back_button.set_alpha(50)
+        self.screen.blit(back_button, [self.x, self.y])
+        
+        if self.x + 100 > self.mouse[0] > self.x and self.y < self.mouse[1] < self.y + 100: # mouse click event range
+            if self.click[0] == 1:
                 return True
 
-
-class MainLogo(pygame.sprite.Sprite):
-    Text = "BLUE"
-    font = pygame.font.Font('Resource\Font\MASQUE__.ttf',65)
-    def __init__(self,x,y):
-            pygame.sprite.Sprite.__init__(self)
-            self.image = pygame.Surface([250,250])
-            self.image.set_alpha(0)
-            self.rect =  self.image.get_rect()
-            self.rect.x = x
-            self.rect.y = y
-    def update(self):
-        return
-
-
-class SongList(pygame.sprite.Sprite):
+class SongList(pygame.sprite.Sprite): # song list button
     List= []
     List_map = []
     List_font = []
@@ -147,7 +122,7 @@ class SongList(pygame.sprite.Sprite):
     list_focus = 0
     list_count = 0
 
-    start = 200
+    start = Setting_Value.Display_Set.title[1] - 50
     margin = 50
     margin_background = 600
 
@@ -162,25 +137,26 @@ class SongList(pygame.sprite.Sprite):
     alpha_value = 180
     alpha_value_change_speed = 0
 
-    SongSpeed = 1
+    SongSpeed = 3
 
-    main_font = pygame.font.Font("Resource\Font\MASQUE__.ttf", 35)
-    font = pygame.font.Font('Resource\Font\infinite.ttf', 25)
-    font2 = pygame.font.Font('Resource\Font\infinite.ttf', 40)
-    font3 = pygame.font.Font("Resource\Font\infinite.ttf", 25)
-    font4 = pygame.font.Font("Resource\Font\infinite.ttf", 55)
+    main_font = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 35)
+    font = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 60)
+    font2 = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 55)
+    font3 = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 40)
+    font4 = pygame.font.Font('Resource\Font\SansJP.otf', 40)
+    
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface([500, 1600])
         self.background = pygame.Surface(Setting_Value.Display_Set.display_size)
         self.screen = screen
 
-    def append(self,title, bg_image, artist,difficulty ,map= None):
+    def append(self,title, bg_image, artist,difficulty):
         self.List.append(title)
-        self.List_font.append(self.font.render(title,True,NOT_SELECTED))
+        self.List_font.append(self.font.render(title, True, NOT_SELECTED))
         self.List_Background.append(bg_image)
         self.List_map.append(map)
-        self.List_SongInfo.append(SongInfo(self.screen,title,artist,None,0,difficulty,None))
+        self.List_SongInfo.append(SongInfo(self.screen, title, artist, None, 0, difficulty, None))
         self.list_count +=1
 
     def update(self, up= False, down= False, Sort_A = False, Sort_B = False, enter= False, SpeedUp = False, SpeedDown = False):
@@ -190,15 +166,19 @@ class SongList(pygame.sprite.Sprite):
         # gap size between two items
         self.margin = 50
         self.screen.blit(self.background, [0, self.pos])
+        
         selected = pygame.Surface([1600,70])
         selected.fill(NOT_SELECTED)
+        
+        pygame.mixer.init()
+        pygame.mixer.pre_init(44100, -16, 2, 2048)
 
         if up and self.list_focus > 0:
             if self.MODE_SCROLL_UP:
                 return False
             self.list_focus -= 1
-            print self.list_focus
-            self.start += 60
+            #print(self.list_focus)
+            self.start += 240
             sound = pygame.mixer.Sound("Sound\sound1.ogg")
             sound.play()
             self.MODE_SCROLL_UP = True
@@ -207,8 +187,8 @@ class SongList(pygame.sprite.Sprite):
             if self.MODE_SCROLL_DOWN:
                 return False
             self.list_focus += 1
-            print self.list_focus
-            self.start -= 60
+            #print(self.list_focus)
+            self.start -= 240
             sound = pygame.mixer.Sound("Sound\sound1.ogg")
             sound.play()
             self.MODE_SCROLL_DOWN = True
@@ -220,7 +200,6 @@ class SongList(pygame.sprite.Sprite):
             self.cover.fill(BLACK)
             pygame.mixer.Sound("Sound\sound2.ogg").play()
 
-
         if 1600 > self.mouse[0] > 400 and 300 > self.mouse[1] > 230:
             if self.click[0] == 1:
                 pygame.time.delay(100)
@@ -231,11 +210,14 @@ class SongList(pygame.sprite.Sprite):
                 pygame.mixer.Sound("Sound\sound2.ogg").play()
 
         self.margin_background = 0
+        #self.cover = pygame.image.load("Resource\_cover.png").convert_alpha()
         for image in self.List_Background:
-            self.screen.blit(image, [0,self.pos + self.margin_background])
+            self.screen.blit(image, [0, self.pos + self.margin_background])
             self.margin_background  += Setting_Value.Display_Set.bg_margin
+        #self.screen.blit(self.cover, [0, 0])
 
         self.margin_background = 0
+        
         # When Scroll Up
         if self.MODE_SCROLL_UP:
             self.pos += self.speed
@@ -275,31 +257,27 @@ class SongList(pygame.sprite.Sprite):
             pygame.mixer.music.play(0, MapList.MapList[self.get_selected_Song()].highlight + 0.01)
             pygame.mixer.music.set_volume(0.5)
 
-        selected.set_alpha(self.alpha_value)
-        self.screen.blit(selected, (400, 230))
-
         i = 0
         for title in self.List:
-            self.List_font[i] = (self.font.render(title, True, NOT_SELECTED))
+            self.List_font[i] = (self.font3.render(title, True, NOT_SELECTED))
             i +=1
         # only focused item Set Font with WHITE color
         self.List_font[self.list_focus] = self.font2.render(self.List[self.list_focus], True, WHITE)
 
         # OUTPUT PART
-        for i in self.List_font:
+        for i in self.List_font: # song list
             if(i == self.List_font[self.list_focus]):
-                self.screen.blit(i, [405, self.start + self.margin])
-                self.margin += 60
+                self.screen.blit(i, [Setting_Value.Display_Set.title[0], self.start + self.margin])
+                self.margin += 240
                 continue
-            self.screen.blit(i,[450, self.start + self.margin])
-            self.margin += 60
-
-        SongsList_txt = self.main_font.render('Song List', True, WHITE)
-        self.screen.blit(SongsList_txt, Setting_Value.Display_Set.SongList)
+            self.screen.blit(i, [Setting_Value.Display_Set.title[0], self.start + self.margin])
+            self.margin += 240
 
         # COUNT Of Songs
         s = "(%d / %d)" %(self.list_focus+1, self.list_count)
-        self.screen.blit(self.font3.render(s,True,WHITE ), Setting_Value.Display_Set.SongCount)
+        count = self.font4.render(s, True, WHITE)
+        count.set_alpha(50)
+        self.screen.blit(count, Setting_Value.Display_Set.SongCount)
 
         # Information Of Song
         self.List_SongInfo[self.list_focus].update()
@@ -308,30 +286,6 @@ class SongList(pygame.sprite.Sprite):
         if 75 > self.mouse[0] > 25 and 25 < self.mouse[1] < 50:
             if self.click[0] == 1:
                 self.MODE_FADE_OUT = False
-
-        # Set The Speed Of Song
-        if self.MODE_FADE_OUT:
-            self.end_time = time.time()
-            gap = (self.end_time - self.start_time)
-            if gap < 1:
-                self.cover.set_alpha(gap * 215)
-                self.screen.blit(self.cover, [0, 0])
-            else:
-                self.screen.blit(self.cover, [0, 0])
-                self.screen.blit(self.font.render("Set The Speed", True, WHITE), Setting_Value.Display_Set.SetTheSpeed)
-                self.screen.blit(self.font4.render(str(self.SongSpeed), True, WHITE), Setting_Value.Display_Set.SongSpeed)
-                self.screen.blit(self.font2.render("-", True, WHITE), Setting_Value.Display_Set.minus)
-                self.screen.blit(self.font2.render("+", True, WHITE), Setting_Value.Display_Set.plus)
-                if Setting_Value.Display_Set.plus_x + 65 > self.mouse[0] > Setting_Value.Display_Set.plus_x and Setting_Value.Display_Set.plus_y < self.mouse[1] < Setting_Value.Display_Set.plus_y + 55:
-                    if self.click[0]:
-                        if self.SongSpeed < 9:
-                            self.SongSpeed += 1
-                        pygame.time.delay(100)
-                if Setting_Value.Display_Set.minus_x + 65 > self.mouse[0] > Setting_Value.Display_Set.minus_x and Setting_Value.Display_Set.minus_y < self.mouse[1] <Setting_Value.Display_Set.minus_y + 55:
-                    if self.click[0]:
-                        if self.SongSpeed > 1:
-                            self.SongSpeed -= 1
-                        pygame.time.delay(100)
 
     def isGameReadyMode(self, bool = None):
         global MODE_GAME_READY
@@ -346,35 +300,41 @@ class SongList(pygame.sprite.Sprite):
     def get_selected_SongSpeed(self):
         return self.SongSpeed
 
-
 class TimeBar(pygame.sprite.Sprite):
     def __init__(self, screen):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("Resource\_bar.png")
-        self.image.set_colorkey(BLACK)
-        self.image = pygame.transform.scale(self.image, (568, 120))
-        self.image2 = pygame.image.load("Resource\_bar2.png")
         self.length = 0
         self.screen = screen
         self.speed = 0
 
     def update(self):
-        self.indicator = pygame.Surface([self.length, 45])
-        self.indicator.fill(TIMEBAR)
+        self.indicator = pygame.Surface([self.length, 15])
+        self.indicator_th = pygame.Surface([1920, 15]) # threshold
+        
+        self.indicator.set_alpha(50)
+        self.indicator_th.set_alpha(50)
+        
+        self.indicator.fill(COMBO)
+        self.indicator_th.fill(COMBO)
 
-        if self.length > 505:
+        if self.length > 2000: # end of length
             self.speed = 0
         self.length += self.speed
-        self.screen.blit(self.indicator, (Setting_Value.Display_Set.node_x , Setting_Value.Display_Set.node1_y - 130 ))
-        self.screen.blit(self.image, (Setting_Value.Display_Set.node_x - 45, Setting_Value.Display_Set.node1_y - 165))
+        
+        self.screen.blit(self.indicator, (0, 1065)) # 매 프레임 마다 self.speed 만큼 증가
+        self.screen.blit(self.indicator_th, (0, 1065))
 
     def set_endTime(self, _time):
-        self.speed = 500/(_time * 60)
+        self.speed = 2000/(_time * 120)
+    
+    def initialize(self):
+        self.length = 0
+        self.speed = 0
 
-
-class SongInfo(pygame.sprite.Sprite):
-    font = pygame.font.Font('Resource\Font\MASQUE__.ttf', 20)
-    font2 = pygame.font.Font('Resource\Font\Infinite.ttf', 20)
+class SongInfo(pygame.sprite.Sprite):       
+    font1 = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 55)
+    font2 = pygame.font.Font('Resource\Font\SansJP.otf', 45)
+    font3 = pygame.font.Font('Resource\Font\InterparkGothicOTFM.otf', 30)
 
     def __init__(self, screen, title, artist, album_art, speed, difficulty ,BPM = None):
         pygame.sprite.Sprite.__init__(self)
@@ -391,37 +351,15 @@ class SongInfo(pygame.sprite.Sprite):
         self.BPM = BPM
 
     def update(self):
-        title_txt = self.font2.render(self.title,True,WHITE)
-        artist_txt = self.font2.render(self.artist, True, WHITE)
-        difficulty_txt = self.font2.render("Level: "+str(self.difficulty) +" lv", True, WHITE)
+        title_txt = self.font1.render(self.title, True, WHITE)
+        difficulty_txt = self.font2.render("「lv. " + str(self.difficulty) + "」", True, COMBO)
+        artist_txt = self.font3.render(self.artist, True, WHITE)
 
-        self.screen.blit(self.album_art, Setting_Value.Display_Set.album_art)
+        #self.screen.blit(self.album_art, Setting_Value.Display_Set.album_art)
         self.screen.blit(title_txt, Setting_Value.Display_Set.title)
         self.screen.blit(artist_txt, Setting_Value.Display_Set.artist)
         self.screen.blit(difficulty_txt, Setting_Value.Display_Set.difficulty)
         return
-
-
-class SettingList(pygame.sprite.Sprite):
-    main_font = pygame.font.Font("Resource\Font\MASQUE__.ttf", 35)
-
-    def __init__(self, screen):
-        pygame.sprite.Sprite.__init__(self)
-        self.menuBar = pygame.Surface(Setting_Value.Display_Set.menuBar)
-        self.menuBar.fill(SETTING_BAR)
-        self.menuBar.set_alpha(5)
-        self.menuBar_pos = 1366
-        self.screen = screen
-
-    def update(self):
-        # 작아질때 까지 작업을 반복
-        if not (self.menuBar_pos < Setting_Value.Display_Set.menuBar_pos):
-            self.screen.blit(self.menuBar, [self.menuBar_pos, 0])
-            self.menuBar_pos -= 10
-        else:
-            self.screen.blit(self.menuBar, [self.menuBar_pos, 0])
-            self.screen.blit(self.main_font.render("Setting", True, WHITE), Setting_Value.Display_Set.Setting)
-
 
 class FadeOut(threading.Thread):
     def __init__(self, screen, surface):
@@ -442,5 +380,3 @@ class FadeOut(threading.Thread):
                 self.screen.blit(self.surface, [0, 0])
             else:
                 break
-
-

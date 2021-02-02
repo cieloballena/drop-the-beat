@@ -4,6 +4,7 @@ import eyed3
 import Setting_Value
 import time
 import effect
+import UI
 
 pygame.init()
 
@@ -20,14 +21,16 @@ Killed_Note = 0
 Combo = 0
 Perfect_count = 0
 Great_count = 0
+Good_count = 0
 Miss_count = 0
+Bad_count = 0
 isFirstPressed = False
 MODE_FADE_OUT = False
 
+flag = 0
 
 class Map(pygame.sprite.Sprite):
-
-    Speed_tuple = (6, 7, 8, 9, 10, 11, 12, 13, 14, 15)
+    Speed_tuple = (6, 7, 8, 9, 10, 11, 12, 13, 14, 15) # speed value
 
     def __init__(self, file, title, artist, level, highlight=0, album_art=None, screen=None):
         # Read the Play time of MP3 File
@@ -62,7 +65,7 @@ class Map(pygame.sprite.Sprite):
         self.index_SyncTime = 0
         self.index_LongNote = 0
 
-        # Hard Mode Map
+        # Hard Mode Map, not using
         self.Group_Note_Map_Hard = []
         self.Group_Note_Map_SyncTime_Hard = []
         self.Group_LongNote_Map_Length_Hard = []
@@ -70,7 +73,7 @@ class Map(pygame.sprite.Sprite):
         self.index_SyncTime_Hard = 0
         self.index_LongNote_Hard = 0
 
-    def add_note(self, type, sync_time, length = None):
+    def add_note(self, type, sync_time, length = None): # add easy mode note
         self.Group_Note_Map.append(type)
         self.Group_Note_Map_SyncTime.append(sync_time)
         if length != None:
@@ -78,7 +81,7 @@ class Map(pygame.sprite.Sprite):
         else:
             self.Group_LongNote_Map_Length.append(0)
 
-    def add_note_hard(self, type, sync_time, length=None):
+    def add_note_hard(self, type, sync_time, length=None): # add hard mode note, not using
         self.Group_Note_Map_Hard.append(type)
         self.Group_Note_Map_SyncTime_Hard.append(sync_time)
         if length != None:
@@ -101,7 +104,7 @@ class Map(pygame.sprite.Sprite):
     def get_level(self):
         return self.level
 
-    def get_album_artist(self):
+    def get_album_artist(self):     
         return self.album_art
 
     def get_note(self):
@@ -164,166 +167,222 @@ class note(pygame.sprite.Sprite):
     Combo = 0
     onCount = 0
     MODE_FADE_OUT = None
+    is_killed = False
 
-    def __init__(self, screen, width, height, type, speed =10, isLongNote = False):
+    def __init__(self, screen, width, height, type, speed = 10):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface([width, height])
         self.screen = screen
         self.width = width
         if type == 1:
-            self.image = pygame.image.load("Resource\_note\_note1.jpg").convert()
+            self.image = pygame.image.load("Resource\_note\_note.png").convert_alpha()
         elif type == 2:
-            self.image = pygame.image.load("Resource\_note\_note2.jpg").convert()
+            self.image = pygame.image.load("Resource\_note\_note.png").convert_alpha()
+        elif type == 3:
+            self.image = pygame.image.load("Resource\_note\_note.png").convert_alpha()
         else:
-            self.image = pygame.image.load("Resource\_note\_note3.jpg").convert()
-        self.image = pygame.transform.scale(self.image,(width, height))
+            self.image = pygame.image.load("Resource\_note\_note.png").convert_alpha()
+            
+        self.image = pygame.transform.scale(self.image, (width, height))
         self.rect = self.image.get_rect()
         self.speed = speed
-        self.rect.x = Setting_Value.Display_Set.note_init_pos
+        self.rect.y = Setting_Value.Display_Set.note_init_pos # 0
         self.type = type
-        self.isLongNote = isLongNote
         self.LongNote_judge = 3
-        if type == 1:
-            self.rect.y = Setting_Value.Display_Set.node1_y - 64
-        elif type == 2:
-            self.rect.y = Setting_Value.Display_Set.node2_y - 64
-        else:
-            self.rect.y = Setting_Value.Display_Set.node3_y - 64
 
+        # note position
+        if type == 1:
+            self.rect.x = Setting_Value.Display_Set.node1_x - 50
+        elif type == 2:
+            self.rect.x = Setting_Value.Display_Set.node2_x - 50
+        elif type == 3:
+            self.rect.x = Setting_Value.Display_Set.node3_x - 50
+        elif type == 4:
+            self.rect.x = Setting_Value.Display_Set.node4_x - 50
+        
     def update(self, type = 0, KeyPressed = False, KeyUp = False):
-        self.rect.x -= self.speed
+        self.rect.y += self.speed
 
         if self.note_fade_out():
             if self.onCount == 0:
                 # When This Loop Was First Called, init the start_time
                 self.start_time = time.time()
             end_time = time.time() - self.start_time
-            self.image.set_alpha(255 - (end_time * 555))
+            #self.image.set_alpha(255 - (end_time * 555))
             self.onCount += 1
-            if end_time> 1.25:
+            if end_time > 0:
                 self.kill()
                 killed_note(1)
                 self.onCount = 0
                 self.note_fade_out(False)
             return
-        if self.isLongNote:
-            if isFirstPressed:
-                if (self.rect.x + self.width)/3 *2 < Setting_Value.Display_Set.note_judge_margin and KeyUp:
-                    print 'done'
-                    combo(1)
-                    self.note_fade_out(True)
-                    score(self.LongNote_judge)
-                    is_first_pressed(False)
-                elif KeyUp:
-                    print 'miss1'
-                    combo(0, True)
-                    self.note_fade_out(True)
-                    score(3)
-                    is_first_pressed(False)
-            elif Setting_Value.Display_Set.note_judge_margin < self.rect.x < Setting_Value.Display_Set.note_judge_margin + 30 and KeyPressed and self.type == type:
-                print 'miss'
-                combo(0, True)
-                self.note_fade_out(True)
-                self.LongNote_judge = 3
-                miss(1)
-            elif Setting_Value.Display_Set.note_judge_margin - 25 <= self.rect.x < Setting_Value.Display_Set.note_judge_margin and KeyPressed and self.type == type:
-                print 'great'
-                is_first_pressed(True)
-                self.LongNote_judge = 2
-            elif Setting_Value.Display_Set.note_judge_margin - 57 <= self.rect.x < Setting_Value.Display_Set.note_judge_margin - 25 and KeyPressed and self.type == type:
-                print 'perfect1'
-                is_first_pressed(True)
-                self.LongNote_judge = 1
-            elif not KeyPressed and self.rect.x < Setting_Value.Display_Set.note_judge_margin - 57:
-                if self.rect.x + self.width < 230:
-                    print 'miss2'
-                    combo(0, True)
-                    self.note_fade_out(True)
-                    score(3)
-        else:
-            if Setting_Value.Display_Set.note_judge_margin < self.rect.x < Setting_Value.Display_Set.note_judge_margin + 30 and KeyPressed and self.type == type:
-                print 'miss'
-                combo(0, True)
-                self.note_fade_out(True)
-                score(3)
-                miss(1)
-            elif Setting_Value.Display_Set.note_judge_margin - 25 <= self.rect.x < Setting_Value.Display_Set.note_judge_margin and KeyPressed and self.type == type:
-                print 'great'
-                combo(1)
-                self.note_fade_out(True)
-                score(2)
-                great(1)
-            elif Setting_Value.Display_Set.note_judge_margin - 57 < self.rect.x < Setting_Value.Display_Set.note_judge_margin - 25 and KeyPressed and self.type == type:
-                print 'perfect'
-                combo(1)
-                self.note_fade_out(True)
-                score(1)
-                perfect(1)
-            elif self.rect.x < Setting_Value.Display_Set.note_judge_margin -57:
-                print 'miss3'
-                combo(0,True)
-                self.note_fade_out(True)
-                score(3)
-                miss(1)
+        if self.rect.y > Setting_Value.Display_Set.note_judge_margin:
+            #print('fade')
+            self.note_fade()
+        
+        if Setting_Value.Display_Set.note_judge_margin - 50 > self.rect.y > Setting_Value.Display_Set.note_judge_margin - 52 and KeyPressed and self.type == type and not self.is_killed:
+            #print('miss')
+            UI.ALPHA = 0
+            UI.BLPHA = 900
+            combo(0, True)
+            self.note_fade_out(True)
+            #self.glow_frame()
+            score(3)
+            self.judge = "BAD"
+            bad(1)
+        elif Setting_Value.Display_Set.note_judge_margin - 30 >= self.rect.y > Setting_Value.Display_Set.note_judge_margin - 50 and KeyPressed and self.type == type and not self.is_killed:
+            #print('great')
+            self.note_bomb()
+            UI.ALPHA = 0
+            UI.BLPHA = 900
+            combo(1)
+            self.note_fade_out(True)
+            #self.glow_frame()
+            score(2)
+            self.judge = "GREAT"
+            great(1)
+        elif Setting_Value.Display_Set.note_judge_margin + 60 >= self.rect.y > Setting_Value.Display_Set.note_judge_margin - 30 and KeyPressed and self.type == type and not self.is_killed:
+            #print('perfect')
+            self.note_bomb()
+            UI.ALPHA = 0
+            UI.BLPHA = 900
+            combo(1)
+            self.note_fade_out(True)
+            #self.glow_frame()
+            score(1)
+            self.judge = "PERFECT"
+            perfect(1)
+        elif Setting_Value.Display_Set.note_judge_margin + 120 >= self.rect.y > Setting_Value.Display_Set.note_judge_margin + 60 and KeyPressed and self.type == type and not self.is_killed:
+            #print('good')
+            self.note_bomb()
+            UI.ALPHA = 0
+            UI.BLPHA = 900
+            combo(1)
+            self.note_fade_out(True)
+            #self.glow_frame()
+            score(2)
+            self.judge = "GOOD"
+            good(1)
+        elif self.rect.y > Setting_Value.Display_Set.note_judge_margin + 120 and not self.is_killed:
+            #print('miss3')
+            UI.ALPHA = 0
+            UI.BLPHA = 900
+            combo(0,True)
+            self.note_fade_out(True)
+            #self.glow_frame()
+            score(3)
+            self.judge = "MISS"
+            miss(1)
 
     def re_init(self):
         self.alive()
-        self.rect.x = Setting_Value.Display_Set.note_init_pos
+        self.rect.y = Setting_Value.Display_Set.note_init_pos
 
-    def note_fade_out(self, bool = None):
+    def note_fade(self): # only alpha
+        self.image.set_alpha(25)
+        
+    def note_fade_out(self, bool = None): # note kill
         if bool == None:
             return self.MODE_FADE_OUT
         self.MODE_FADE_OUT = bool
+        self.is_killed = True
         return self.MODE_FADE_OUT
+    
+    def note_bomb(self):
+        if self.type == 1:
+            effect.bomb_anim1.play()
+        elif self.type == 2:
+            effect.bomb_anim2.play()
+        elif self.type == 3:
+            effect.bomb_anim3.play()
+        elif self.type == 4:
+            effect.bomb_anim4.play()
+    
+    '''
+    def glow_frame(self):
+        effect.glow_anim.play()
+    '''
 
-
-def combo(increase, init = False):
+def combo(increase, init = False): # calc combo count
     global Combo
     if init:
         Combo = 0
     Combo += increase
     return Combo
 
-
-def killed_note(increase, init = False):
+def killed_note(increase, init = False): # calc killed note count
     global Killed_Note
     if init:
         Killed_Note = 0
     Killed_Note += increase
     return Killed_Note
 
+def judge(): # 판정
+    global flag
+    if flag == 0:
+        return "MISS", (128, 128, 192), (885, 560)
+    elif flag == 1:
+        return "GREAT", (128, 255, 255), (865, 560)
+    elif flag == 2:
+        return "PERFECT", (255, 255, 128), (827, 560)
+    elif flag == 3:
+        return "GOOD", (255, 128, 255), (885, 560)
+    elif flag == 4:
+        return "BAD", (128, 128, 128), (905, 560)
 
-def perfect(increase, init = False):
+def perfect(increase, init = False): # calc perfect count
     global Perfect_count
+    global flag
     if init:
         Perfect_count = 0
     Perfect_count += 1
+    flag = 2
     return Perfect_count
 
+def good(increase, init = False): # calc good count
+    global Good_count
+    global flag
+    if init:
+        Good_count = 0
+    Good_count += 1
+    flag = 3
+    return Good_count
 
-def great(increase, init = False):
+def great(increase, init = False): # calc great count
     global Great_count
+    global flag
     if init:
         Great_count = 0
     Great_count += 1
+    flag = 1
     return Great_count
 
+def bad(increase, init = False): # calc bad count
+    global Bad_count
+    global flag
+    if init:
+        Bad_count = 0
+    Bad_count += 1
+    flag = 4
+    return Bad_count
 
-def miss(increase, init = False ):
+def miss(increase, init = False): # calc miss count
     global Miss_count
+    global flag
     if init:
         Miss_count = 0
     Miss_count += 1
+    flag = 0
     return Miss_count
 
 
-def is_first_pressed(bool):
+def is_first_pressed(bool): # 
     global isFirstPressed
     isFirstPressed = bool
     return isFirstPressed
 
 
-def score(__type, selected_map=None):
+def score(__type, selected_map=None): # calc score
     global temp_score
     global rest
     global increase
@@ -335,17 +394,51 @@ def score(__type, selected_map=None):
 
     if not selected_map == None:
         rest = math.fmod(100000, selected_map.get_note_count())
-        increase = (100000 - rest) / selected_map.get_note_count()
+        increase = (100000 - rest) / selected_map.get_note_count() # calc score of one note
 
-    if __type == 1:
-        # PERFECT
+    if __type == 1: # PERFECT
         temp_score += increase
-    elif __type == 2:
-        # GREAT
+    elif __type == 2: # GREAT
         temp_score += (increase / 10) * 8
-    elif __type == 3:
-        # MISS
+    elif __type == 3: # MISS, BAD
         temp_score += 0
 
     return int(temp_score)
 
+def result():
+    global temp_score
+    global Perfect_count
+    global Great_count
+    global Good_count
+    global Bad_count
+    global Miss_count
+    
+    score = int(temp_score)
+    count = (Perfect_count, Great_count, Good_count, Bad_count, Miss_count)
+    
+    if score == 100000:
+        return score, "S", (255, 255, 64), count
+    elif score > 80000:
+        return score, "A", (64, 255, 255), count
+    elif score > 60000:
+        return score, "B", (255, 255, 64), count
+    elif score > 40000:
+        return score, "C", (128, 128, 192), count
+    else:
+        return score, "D", (128, 128, 128), count
+
+def initialize():
+    global temp_score
+    global Perfect_count
+    global Great_count
+    global Good_count
+    global Bad_count
+    global Miss_count
+    
+    # initialize
+    temp_score = 0
+    Perfect_count = 0
+    Great_count = 0
+    Good_count = 0
+    Bad_count = 0
+    Miss_count = 0
