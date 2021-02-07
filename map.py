@@ -5,6 +5,7 @@ import Setting_Value
 import time
 import effect
 import UI
+import threading
 
 pygame.init()
 
@@ -232,7 +233,8 @@ class note(pygame.sprite.Sprite):
             bad(1)
         elif Setting_Value.Display_Set.note_judge_margin - 30 >= self.rect.y > Setting_Value.Display_Set.note_judge_margin - 50 and KeyPressed and self.type == type and not self.is_killed:
             #print('great')
-            self.note_bomb()
+            thread_bomb = threading.Thread(target=self.note_bomb())
+            thread_bomb.start()
             UI.ALPHA = 0
             UI.BLPHA = 900
             combo(1)
@@ -243,7 +245,8 @@ class note(pygame.sprite.Sprite):
             great(1)
         elif Setting_Value.Display_Set.note_judge_margin + 60 >= self.rect.y > Setting_Value.Display_Set.note_judge_margin - 30 and KeyPressed and self.type == type and not self.is_killed:
             #print('perfect')
-            self.note_bomb()
+            thread_bomb = threading.Thread(target=self.note_bomb())
+            thread_bomb.start()
             UI.ALPHA = 0
             UI.BLPHA = 900
             combo(1)
@@ -254,7 +257,8 @@ class note(pygame.sprite.Sprite):
             perfect(1)
         elif Setting_Value.Display_Set.note_judge_margin + 120 >= self.rect.y > Setting_Value.Display_Set.note_judge_margin + 60 and KeyPressed and self.type == type and not self.is_killed:
             #print('good')
-            self.note_bomb()
+            thread_bomb = threading.Thread(target=self.note_bomb())
+            thread_bomb.start()
             UI.ALPHA = 0
             UI.BLPHA = 900
             combo(1)

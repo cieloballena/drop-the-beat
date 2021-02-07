@@ -95,18 +95,15 @@ done = False
 # Used to manage how fast the screen updates
 clock = pygame.time.Clock()
 
-def print_effect():
-    effect.note_anim1.blit(screen, (Setting_Value.Display_Set.node1_x - 50, Setting_Value.Display_Set.node_y - 932))
-    effect.note_anim2.blit(screen, (Setting_Value.Display_Set.node2_x - 50, Setting_Value.Display_Set.node_y - 932))
-    effect.note_anim3.blit(screen, (Setting_Value.Display_Set.node3_x - 50, Setting_Value.Display_Set.node_y - 932))
-    effect.note_anim4.blit(screen, (Setting_Value.Display_Set.node4_x - 50, Setting_Value.Display_Set.node_y - 932))
-    
-    effect.bomb_anim1.blit(screen, (Setting_Value.Display_Set.node1_x - 148, Setting_Value.Display_Set.node_y - 230))
-    effect.bomb_anim2.blit(screen, (Setting_Value.Display_Set.node2_x - 148, Setting_Value.Display_Set.node_y - 230))
-    effect.bomb_anim3.blit(screen, (Setting_Value.Display_Set.node3_x - 148, Setting_Value.Display_Set.node_y - 230))
-    effect.bomb_anim4.blit(screen, (Setting_Value.Display_Set.node4_x - 148, Setting_Value.Display_Set.node_y - 230))
-    
-    effect.glow_anim.blit(screen, (550, 0))
+def print_effect(select):
+    if select == 1:
+        effect.note_anim1.play()
+    elif select == 2:
+        effect.note_anim2.play()
+    elif select == 3:
+        effect.note_anim3.play()
+    elif select == 4:
+        effect.note_anim4.play()
 
 def print_node():
     if MODE_NOTE_FALL:
@@ -246,9 +243,7 @@ while not done:
                             NoteList_Drawer.pop()
                         break
 
-            # --- Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
-            # --- Limit to 60 frames per second
             clock.tick(120)
 
         tmp.set_alpha(75)
@@ -275,9 +270,8 @@ while not done:
                         pygame.mixer.unpause()
                         PAUSE = False
                         GAME_READY_STATE = False
-            # --- Go ahead and update the screen with what we've drawn.
+
             pygame.display.flip()
-            # --- Limit to 60 frames per second
             clock.tick(120)
 
         while GAME_READY_STATE: # game ready state
@@ -321,9 +315,7 @@ while not done:
                 break
             screen.blit(title, Setting_Value.Display_Set.loading)
 
-            # Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
-            # 120 frames per second
             clock.tick(120)
 
         # When Game is Playing
@@ -367,8 +359,8 @@ while not done:
             judge_text = judge_font.render(a, True, b) # color should be chaanged
             judge_text.set_alpha(UI.BLPHA)
             
-            thread_effect = threading.Thread(target=print_effect)
-            thread_effect.start()
+            #thread_effect = threading.Thread(target=print_effect)
+            #thread_effect.start()
             
             if(UI.ALPHA != 255):
                 UI.ALPHA += 51
@@ -389,6 +381,18 @@ while not done:
             thread_note.start()
             
             node_group.update(False, False)
+            
+            effect.note_anim1.blit(screen, (Setting_Value.Display_Set.node1_x - 50, Setting_Value.Display_Set.node_y - 932))
+            effect.note_anim2.blit(screen, (Setting_Value.Display_Set.node2_x - 50, Setting_Value.Display_Set.node_y - 932))
+            effect.note_anim3.blit(screen, (Setting_Value.Display_Set.node3_x - 50, Setting_Value.Display_Set.node_y - 932))
+            effect.note_anim4.blit(screen, (Setting_Value.Display_Set.node4_x - 50, Setting_Value.Display_Set.node_y - 932))
+    
+            effect.bomb_anim1.blit(screen, (Setting_Value.Display_Set.node1_x - 148, Setting_Value.Display_Set.node_y - 230))
+            effect.bomb_anim2.blit(screen, (Setting_Value.Display_Set.node2_x - 148, Setting_Value.Display_Set.node_y - 230))
+            effect.bomb_anim3.blit(screen, (Setting_Value.Display_Set.node3_x - 148, Setting_Value.Display_Set.node_y - 230))
+            effect.bomb_anim4.blit(screen, (Setting_Value.Display_Set.node4_x - 148, Setting_Value.Display_Set.node_y - 230))
+    
+            effect.glow_anim.blit(screen, (550, 0))
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -396,22 +400,26 @@ while not done:
                     GAME_STATE = False
                 if event.type == pygame.KEYDOWN: # key board down event
                     if event.key == pygame.K_d: # node key
-                        effect.note_anim1.play() # node beam
+                        thread_effect = threading.Thread(target=print_effect(1))
+                        thread_effect.start()
                         for i in range(map.killed_note(0), Note_Count):
                             NoteList_Drawer[i].update(1, True)
                         node1.update(True, False, 1)
                     if event.key == pygame.K_f:
-                        effect.note_anim2.play()
+                        thread_effect = threading.Thread(target=print_effect(2))
+                        thread_effect.start()
                         for i in range(map.killed_note(0), Note_Count):
                             NoteList_Drawer[i].update(2, True)
                         node2.update(True, False, 2)
                     if event.key == pygame.K_k:
-                        effect.note_anim3.play()
+                        thread_effect = threading.Thread(target=print_effect(3))
+                        thread_effect.start()
                         for i in range(map.killed_note(0), Note_Count):
                             NoteList_Drawer[i].update(3, True)
                         node3.update(True, False, 3)
                     if event.key == pygame.K_l:
-                        effect.note_anim4.play()
+                        thread_effect = threading.Thread(target=print_effect(4))
+                        thread_effect.start()
                         for i in range(map.killed_note(0), Note_Count):
                             NoteList_Drawer[i].update(4, True)
                         node4.update(True, False, 4)
@@ -441,9 +449,7 @@ while not done:
                             NoteList_Drawer[i].update(4, True, True)
                         node4.update(False, True, 4)
                         
-            # --- Go ahead and update the screen with what we've drawn.
             pygame.display.flip()
-            # --- Limit to 120 frames per second
             clock.tick(120)
 
     # --- INTRO SCENE LOOP ---
@@ -504,8 +510,5 @@ while not done:
                     map.score(-1, MapList.MapList[List.get_selected_Song()])
                     start_time = time.time()
 
-        # --- Go ahead and update the screen with what we've drawn.
         pygame.display.flip()
-
-        # --- Limit to 60 frames per second
         clock.tick(120)
