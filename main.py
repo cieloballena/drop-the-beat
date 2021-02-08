@@ -111,9 +111,8 @@ def print_node():
             NoteList_Drawer[i].draw(screen)
             NoteList_Drawer[i].update(0)
             
-# -------- main Program Loop -----------
+# main loop
 while not done:
-    # --- Main event loop
     for event in pygame.event.get():  # User did something
         if event.type == pygame.QUIT:  # If user clicked close
             pygame.mixer.music.stop()
@@ -175,6 +174,53 @@ while not done:
                 INTRO_STATE = True
                 pygame.mixer.music.stop()
                 pygame.time.delay(300)
+            break
+        
+        if (GAME_STATE == True) and pygame.mixer.get_busy() and (PAUSE == False):
+            if event.type == pygame.QUIT:
+                pygame.mixer.stop()
+                GAME_STATE = False
+                
+            if event.type == pygame.KEYDOWN: # key board down event
+                if event.key == pygame.K_d: # node key
+                    thread_effect = threading.Thread(target=print_effect(1))
+                    thread_effect.start()
+                    for i in range(map.killed_note(0), Note_Count):
+                        NoteList_Drawer[i].update(1, True)
+                    node1.update(True, False, 1)
+                if event.key == pygame.K_f:
+                    thread_effect = threading.Thread(target=print_effect(2))
+                    thread_effect.start()
+                    for i in range(map.killed_note(0), Note_Count):
+                        NoteList_Drawer[i].update(2, True)
+                    node2.update(True, False, 2)
+                if event.key == pygame.K_k:
+                    thread_effect = threading.Thread(target=print_effect(3))
+                    thread_effect.start()
+                    for i in range(map.killed_note(0), Note_Count):
+                        NoteList_Drawer[i].update(3, True)
+                    node3.update(True, False, 3)
+                if event.key == pygame.K_l:
+                    thread_effect = threading.Thread(target=print_effect(4))
+                    thread_effect.start()
+                    for i in range(map.killed_note(0), Note_Count):
+                        NoteList_Drawer[i].update(4, True)
+                    node4.update(True, False, 4)
+                if event.key == pygame.K_ESCAPE:
+                    pygame.mixer.pause()
+                    PAUSE = True
+                break
+
+            if event.type == pygame.KEYUP: # key board up event
+                if event.key == pygame.K_d:
+                    effect.note_anim1.stop()
+                if event.key == pygame.K_f:
+                    effect.note_anim2.stop()
+                if event.key == pygame.K_k:
+                    effect.note_anim3.stop()
+                if event.key == pygame.K_l:
+                    effect.note_anim4.stop()
+                break
 
     if GAME_STATE:
         while COMPLETE_STATE: # complete state
@@ -393,61 +439,6 @@ while not done:
             effect.bomb_anim4.blit(screen, (Setting_Value.Display_Set.node4_x - 148, Setting_Value.Display_Set.node_y - 230))
     
             effect.glow_anim.blit(screen, (550, 0))
-
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.mixer.stop()
-                    GAME_STATE = False
-                if event.type == pygame.KEYDOWN: # key board down event
-                    if event.key == pygame.K_d: # node key
-                        thread_effect = threading.Thread(target=print_effect(1))
-                        thread_effect.start()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(1, True)
-                        node1.update(True, False, 1)
-                    if event.key == pygame.K_f:
-                        thread_effect = threading.Thread(target=print_effect(2))
-                        thread_effect.start()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(2, True)
-                        node2.update(True, False, 2)
-                    if event.key == pygame.K_k:
-                        thread_effect = threading.Thread(target=print_effect(3))
-                        thread_effect.start()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(3, True)
-                        node3.update(True, False, 3)
-                    if event.key == pygame.K_l:
-                        thread_effect = threading.Thread(target=print_effect(4))
-                        thread_effect.start()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(4, True)
-                        node4.update(True, False, 4)
-                    if event.key == pygame.K_ESCAPE:
-                        pygame.mixer.pause()
-                        PAUSE = True
-
-                if event.type == pygame.KEYUP: # key board up event
-                    if event.key == pygame.K_d:
-                        effect.note_anim1.stop()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(1, True, True)
-                        node1.update(False, True, 1)
-                    if event.key == pygame.K_f:
-                        effect.note_anim2.stop()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(2, True, True)
-                        node2.update(False, True, 2)
-                    if event.key == pygame.K_k:
-                        effect.note_anim3.stop()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(3, True, True)
-                        node3.update(False, True, 3)
-                    if event.key == pygame.K_l:
-                        effect.note_anim4.stop()
-                        for i in range(map.killed_note(0), Note_Count):
-                            NoteList_Drawer[i].update(4, True, True)
-                        node4.update(False, True, 4)
                         
             pygame.display.flip()
             clock.tick(120)
